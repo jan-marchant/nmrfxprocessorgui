@@ -328,6 +328,7 @@ public class FXMLController implements FractionPaneChild, Initializable, PeakNav
     }
 
     public PolyChart getActiveChart() {
+        //fixme: if activeChart is null, create
         return activeChart;
     }
 

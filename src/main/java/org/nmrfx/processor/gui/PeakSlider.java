@@ -90,7 +90,7 @@ public class PeakSlider {
         buttons.add(thawButton);
 
         tweakFreezeButton = GlyphsDude.createIconButton(FontAwesomeIcon.BULLSEYE, "Tweak+Freeze", iconSize, fontSize, ContentDisplay.TOP);
-        tweakFreezeButton.setOnAction(e -> tweakPeaks());
+        tweakFreezeButton.setOnAction(e -> tweakPeaks(e));
         buttons.add(tweakFreezeButton);
 
         linkButton = GlyphsDude.createIconButton(FontAwesomeIcon.CHAIN, "Link", iconSize, fontSize, ContentDisplay.TOP);
@@ -227,18 +227,24 @@ public class PeakSlider {
         });
     }
 
-    public void tweakPeaks() {
+    public void tweakPeaks(Event event) {
+        if (shouldRespond(event)) {
+            tweakPeaks(getAltState(event));
+        }
+    }
+
+    public void tweakPeaks(boolean useAllConditions) {
         // do setup because we could have added a peak list after adding slider controller.  Should be a better way
         setupLists(true);
         controller.charts.stream().forEach(chart -> {
             List<Peak> selected = chart.getSelectedPeaks();
             selected.forEach((peak) -> {
-                tweakPeak(peak);
+                tweakPeak(peak,useAllConditions);
             });
         });
     }
 
-    public void tweakPeak(Peak peak) {
+    public void tweakPeak(Peak peak,boolean useAllConditions) {
         Set<Peak> peakSet = new HashSet<>();
         int nDim = peak.getPeakList().getNDim();
         for (int i = 0; i < nDim; i++) {
@@ -249,7 +255,6 @@ public class PeakSlider {
         List<Peak> peaksB = new ArrayList<>();
         // find all peaks that are linked in all dimensions to original peak
         // These are the peaks that should be tweaked when original peak is tweaked.
-        // fixme add test for condition, if not useAllConditions (and pass this in as arg)
         for (Peak speak : peakSet) {
             if (speak == peak) {
                 continue;
@@ -280,9 +285,9 @@ public class PeakSlider {
                     dataset = Dataset.getDataset(peakList.fileName);
                     if (dataset != null) {
                         lPeak.tweak(dataset, pdim, planes);
-                        lPeak.setFrozen(true, false);
                     }
                 }
+                peak.setFrozen(true, useAllConditions);
             } catch (IOException ioE) {
 
             }
