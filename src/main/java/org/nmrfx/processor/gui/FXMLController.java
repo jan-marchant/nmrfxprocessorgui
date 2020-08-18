@@ -1603,6 +1603,7 @@ public class FXMLController implements FractionPaneChild, Initializable, PeakNav
         int nCurrent = charts.size();
         if (nCurrent > nCharts) {
             for (int i = nCurrent - 1; i >= nCharts; i--) {
+                charts.get(i).clearDataAndPeaks();
                 charts.get(i).close();
             }
         } else if (nCharts > nCurrent) {

@@ -1552,6 +1552,60 @@ public class PolyChart implements PeakListener {
         refresh();
     }
 
+    public void updateDatasetObjects(List<Dataset> targets) {
+        ObservableList<DatasetAttributes> datasetAttrs = getDatasetAttributes();
+        List<DatasetAttributes> newList = new ArrayList<>();
+        boolean updated = false;
+        int iTarget = 0;
+        for (Dataset dataset : targets) {
+            int n = newList.size();
+            int jData = 0;
+            int addAt = -1;
+            for (DatasetAttributes datasetAttr : datasetAttrs) {
+                if (datasetAttr.getDataset().equals(dataset)) {
+                    newList.add(datasetAttr);
+                    addAt = jData;
+                }
+                jData++;
+            }
+            if (iTarget != addAt) {
+                updated = true;
+            }
+            // if didn't add one, then create new DatasetAttributes
+            if (newList.size() == n) {
+                if (dataset != null) {
+                    int nDim = dataset.getNDim();
+                    // fixme kluge as not all datasets that are freq domain have attribute set
+                    for (int i = 0; (i < nDim) && (i < 2); i++) {
+                        dataset.setFreqDomain(i, true);
+                    }
+                    DatasetAttributes newAttr = new DatasetAttributes(dataset);
+                    newList.add(newAttr);
+                    updated = true;
+                } else {
+                    System.out.println("null dataset");
+                }
+            }
+            iTarget++;
+        }
+        if (newList.size() != datasetAttrs.size()) {
+            updated = true;
+        }
+        if (updated) {
+            if (!newList.isEmpty() && datasetAttrs.isEmpty()) {
+                // if no datsets present already must use addDataset once to set up
+                // various parameters
+                controller.addDataset(newList.get(0).getDataset(), false, false);
+                newList.remove(0);
+                datasetAttrs.addAll(newList);
+            } else {
+                datasetAttrs.clear();
+                datasetAttrs.addAll(newList);
+            }
+        }
+
+    }
+
     public void updateDatasets(List<String> targets) {
         ObservableList<DatasetAttributes> datasetAttrs = getDatasetAttributes();
         List<DatasetAttributes> newList = new ArrayList<>();
@@ -2095,6 +2149,7 @@ public class PolyChart implements PeakListener {
             peakCanvas.setHeight(canvas.getHeight());
             GraphicsContext peakGC = peakCanvas.getGraphicsContext2D();
             peakGC.clearRect(xPos, yPos, width, height);
+            gCPeaks.clearRect(xPos, yPos, width, height);
             gC.beginPath();
 //
 //        if (annoCanvas != null) {
@@ -2664,6 +2719,16 @@ public class PolyChart implements PeakListener {
         if (removeSome) {
             peakAttrs.clear();
             peakAttrs.addAll(newList);
+        }
+    }
+
+    public void updatePeakListObjects(List<PeakList> targets) {
+        //fixme
+        // removeUnusedPeakLists(targets);
+        for (PeakList peakList : targets) {
+            if (peakList != null) {
+                setupPeakListAttributes(peakList);
+            }
         }
     }
 
@@ -3281,6 +3346,10 @@ public class PolyChart implements PeakListener {
 
     public void addAnnotation(CanvasAnnotation anno) {
         canvasAnnotations.add(anno);
+    }
+
+    public void removeAnnotation(CanvasAnnotation anno) {
+        canvasAnnotations.remove(anno);
     }
 
     void drawAnnotations(GraphicsContextInterface gC) {
