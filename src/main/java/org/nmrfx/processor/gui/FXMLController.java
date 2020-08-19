@@ -1519,11 +1519,28 @@ public class FXMLController implements FractionPaneChild, Initializable, PeakNav
     }
 
     public void showPeakSlider() {
+        if (peakSlider!=null && peakSlider.sliderToolBar==null) {
+            removePeakSlider(peakSlider);
+        }
         if (peakSlider == null) {
             ToolBar navBar = new ToolBar();
             bottomBox.getChildren().add(navBar);
             peakSlider = new PeakSlider(this, this::removePeakSlider);
             peakSlider.initSlider(navBar);
+        }
+    }
+
+    public void showPeakSlider(boolean showToolbar) {
+        if (showToolbar) {
+            showPeakSlider();
+        } else {
+            if (peakSlider == null) {
+                peakSlider = new PeakSlider(this, this::removePeakSlider);
+                peakSlider.initSlider(null);
+            } else {
+                //something here to hide existing toolbar without breaking things?
+                peakSlider.setupLists(true);
+            }
         }
     }
 
