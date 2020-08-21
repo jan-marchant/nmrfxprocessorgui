@@ -1576,7 +1576,9 @@ public class PolyChart implements PeakListener {
                 if (dataset != null) {
                     int nDim = dataset.getNDim();
                     // fixme kluge as not all datasets that are freq domain have attribute set
-                    for (int i = 0; (i < nDim) && (i < 2); i++) {
+                    //  double kludge fr 3D datasets - why can't they be PPM axes?
+                    //for (int i = 0; (i < nDim) && (i < 2); i++) {
+                    for (int i = 0; (i < nDim); i++) {
                         dataset.setFreqDomain(i, true);
                     }
                     DatasetAttributes newAttr = new DatasetAttributes(dataset);
